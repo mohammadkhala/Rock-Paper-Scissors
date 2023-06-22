@@ -1,0 +1,96 @@
+import random
+
+
+class Player:
+    def __init__(self):
+        self.score = 0
+
+    def move(self):
+        return 'rock'
+
+    def learn(self, my_move, their_move):
+        pass
+
+    def increase_score(self):
+        self.score += 1
+
+
+class RandomPlayer(Player):
+    def move(self):
+        return random.choice(['rock', 'paper', 'scissors'])
+
+
+class ReflectPlayer(Player):
+    def __init__(self):
+        super().__init__()
+        self.last_move = None
+
+    def move(self):
+        if self.last_move is None:
+            return random.choice(['rock', 'paper', 'scissors'])
+        return self.last_move
+
+    def learn(self, my_move, their_move):
+        self.last_move = their_move
+
+
+class CyclePlayer(Player):
+    def __init__(self):
+        super().__init__()
+        self.move_index = 0
+
+    def move(self):
+        moves = ['rock', 'paper', 'scissors']
+        move = moves[self.move_index]
+        self.move_index = (self.move_index + 1) % len(moves)
+        return move
+
+
+class HumanPlayer(Player):
+    def move(self):
+        while True:
+            move = input("Enter your move (rock, paper, scissors): ").lower()
+            if move in ['rock', 'paper', 'scissors']:
+                return move
+            print("Invalid move. Please try again.")
+
+
+class Game:
+    def __init__(self, rounds):
+        self.rounds = rounds
+        self.p1 = HumanPlayer()
+        self.p2 = RandomPlayer()
+
+    def play_round(self):
+        move1 = self.p1.move()
+        move2 = self.p2.move()
+        print(f"Player 1: {move1}  Player 2: {move2}")
+        if move1 == move2:
+            print("It's a tie!")
+        elif (move1 == 'rock' and move2 == 'scissors') or \
+                (move1 == 'paper' and move2 == 'rock') or \
+                (move1 == 'scissors' and move2 == 'paper'):
+            print("Player 1 wins!")
+            self.p1.increase_score()
+        else:
+            print("Player 2 wins!")
+            self.p2.increase_score()
+
+        self.p1.learn(move1, move2)
+        self.p2.learn(move2, move1)
+
+    def play_game(self):
+        print("Game start!")
+        for round_num in range(self.rounds):
+            print(f"\nRound {round_num + 1}:")
+            self.play_round()
+
+        print("\nGame over!")
+        print(f"Final Scores - Player 1: "
+              f"{self.p1.score}, Player 2: {self.p2.score}")
+
+
+if __name__ == '__main__':
+    rounds = int(input("Enter the number of rounds: "))
+    game = Game(rounds)
+    game.play_game()
